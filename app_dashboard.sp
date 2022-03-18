@@ -1,91 +1,102 @@
 dashboard "scalingo_app_dashboard" {
   title = "Scalingo App Dashboard"
 
-  container {
-    card {
-      sql   = query.scalingo_app_count.sql
-      width = 2
-    }
-    card {
-      sql   = query.scalingo_app_container.sql
-      width = 2
-    }
-    card {
-      sql   = query.scalingo_addon_count.sql
-      width = 2
-    }
-    card {
-      sql   = query.scalingo_collaborator_count.sql
-      width = 2
-    }
-  }
+  input "app_name" {
+    title = "Application name"
+    width = 2
 
-  container {
-    chart {
-      title = "Regions"
-      sql   = query.scalingo_app_by_region.sql
-      type  = "pie"
-      width = 2
-    }
-  }
-}
-
-query "scalingo_app_count" {
-  sql = <<-EOQ
+    sql  = <<-EOQ
     select
-      count(*) as "Apps"
+      name as label,
+      name as value
     from
       scalingo_app;
   EOQ
+  }
+
+  container {
+    table {
+      title = "Containers"
+      query = query.scalingo_app_containers
+      width = 6
+
+      args  = {
+        app_name = self.input.app_name.value
+      }
+    }
+
+    table {
+      title = "Addons"
+      query = query.scalingo_app_addons
+      width = 6
+
+      args  = {
+        app_name = self.input.app_name.value
+      }
+    }
+
+    table {
+      title = "Activity"
+      query = query.scalingo_app_events
+      width = 6
+
+      args  = {
+        app_name = self.input.app_name.value
+      }
+    }
+  }
 }
 
-query "scalingo_app_container" {
+query "scalingo_app_containers" {
   sql = <<-EOQ
     select
-      sum(scalingo_container.amount) as "Containers"
+      name,
+      amount,
+      command,
+      size
     from
       scalingo_container
-    join
-      scalingo_app
-    on
-      scalingo_container.app_name = scalingo_app.name;
+    where
+     app_name = $1;
   EOQ
+
+
+  param "app_name" {}
 }
 
-query "scalingo_addon_count" {
+query "scalingo_app_addons" {
   sql = <<-EOQ
     select
-      count(*) as "Addons"
+      provider_name as name,
+      status,
+      plan_display_name as plan
     from
       scalingo_addon
-    join
-      scalingo_app
-    on
-      scalingo_addon.app_name = scalingo_app.name;
+    where
+     app_name = $1;
   EOQ
+
+
+  param "app_name" {}
 }
 
-query "scalingo_app_by_region" {
-  sql = <<-EOQ
-    select
-      region as "Region",
-      count(*) as "App"
-    from
-      scalingo_app
-    group by
-      region;
-  EOQ
-}
 
-query "scalingo_collaborator_count" {
+query "scalingo_app_events" {
   sql = <<-EOQ
     select
-      count(distinct(scalingo_collaborator.user_id)) as "Collaborators"
+      created_at as date,
+      type,
+      user_username as user
     from
-      scalingo_collaborator
-    join
-      scalingo_app
-    on
-      scalingo_app.name = scalingo_collaborator.app_name;
+      scalingo_app_event
+    where
+     app_name = $1
+    order by
+      created_at desc
+    limit
+      20;
   EOQ
+
+
+  param "app_name" {}
 }
