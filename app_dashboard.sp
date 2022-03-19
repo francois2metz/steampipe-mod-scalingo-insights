@@ -50,10 +50,10 @@ dashboard "scalingo_app_dashboard" {
 query "scalingo_app_containers" {
   sql = <<-EOQ
     select
-      name,
-      amount,
-      command,
-      size
+      name as "Name",
+      amount as "Amount",
+      command as "Command",
+      size as "Size"
     from
       scalingo_container
     where
@@ -67,9 +67,9 @@ query "scalingo_app_containers" {
 query "scalingo_app_addons" {
   sql = <<-EOQ
     select
-      provider_name as name,
-      status,
-      plan_display_name as plan
+      provider_name as "Name",
+      status as "Status",
+      plan_display_name as "Plan"
     from
       scalingo_addon
     where
@@ -84,9 +84,9 @@ query "scalingo_app_addons" {
 query "scalingo_app_events" {
   sql = <<-EOQ
     select
-      created_at as date,
-      type,
-      user_username as user
+      created_at as "Date",
+      type as "Type",
+      user_username as "User"
     from
       scalingo_app_event
     where

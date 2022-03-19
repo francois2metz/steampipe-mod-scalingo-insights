@@ -78,7 +78,7 @@ query "scalingo_apps_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
-      count(*) as "App"
+      count(*)
     from
       scalingo_app
     group by
@@ -103,8 +103,8 @@ query "scalingo_collaborators_count" {
 query "scalingo_apps" {
   sql = <<-EOQ
     select
-      name,
-      region
+      name as "Name",
+      region as "Region"
     from
       scalingo_app;
   EOQ
