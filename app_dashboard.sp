@@ -15,6 +15,28 @@ dashboard "scalingo_app_dashboard" {
   }
 
   container {
+    card {
+      query = query.scalingo_app_containers_count
+      width = 2
+      icon = "heroicons-outline:server"
+
+      args  = {
+        app_name = self.input.app_name.value
+      }
+    }
+
+    card {
+      query = query.scalingo_app_collaborators_count
+      width = 2
+      icon = "person"
+
+      args  = {
+        app_name = self.input.app_name.value
+      }
+    }
+  }
+
+  container {
     table {
       title = "Containers"
       query = query.scalingo_app_containers
@@ -38,6 +60,16 @@ dashboard "scalingo_app_dashboard" {
     table {
       title = "Activity"
       query = query.scalingo_app_events
+      width = 6
+
+      args  = {
+        app_name = self.input.app_name.value
+      }
+    }
+
+    table {
+      title = "Collaborators"
+      query = query.scalingo_app_collaborators
       width = 6
 
       args  = {
@@ -90,11 +122,54 @@ query "scalingo_app_events" {
     from
       scalingo_app_event
     where
-     app_name = $1
-    order by
-      created_at desc
+      app_name = $1
     limit
       20;
+  EOQ
+
+
+  param "app_name" {}
+}
+
+query "scalingo_app_collaborators" {
+  sql = <<-EOQ
+    select
+      username as "Username",
+      email as "Email",
+      status as "Status"
+    from
+      scalingo_collaborator
+    where
+      app_name = $1;
+  EOQ
+
+
+  param "app_name" {}
+}
+
+
+query "scalingo_app_containers_count" {
+  sql = <<-EOQ
+    select
+      sum(amount) as "Containers"
+    from
+      scalingo_container_type
+    where
+     app_name = $1;
+  EOQ
+
+
+  param "app_name" {}
+}
+
+query "scalingo_app_collaborators_count" {
+  sql = <<-EOQ
+    select
+      count(*) as "Collaborators"
+    from
+      scalingo_collaborator
+    where
+      app_name = $1;
   EOQ
 
 
