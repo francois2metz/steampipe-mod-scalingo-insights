@@ -55,7 +55,7 @@ query "scalingo_app_containers" {
       command as "Command",
       size as "Size"
     from
-      scalingo_container
+      scalingo_container_type
     where
      app_name = $1;
   EOQ
