@@ -32,8 +32,8 @@ dashboard "scalingo_dashboard" {
       title = "Apps"
       sql   = query.scalingo_apps.sql
 
-      column "name" {
-        href = "${dashboard.scalingo_app_dashboard.url_path}?input.app_name={{.'name' | @uri}}"
+      column "Name" {
+        href = "${dashboard.scalingo_app_dashboard.url_path}?input.app_name={{.'Name' | @uri}}"
       }
     }
   }
