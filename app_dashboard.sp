@@ -6,15 +6,25 @@ dashboard "scalingo_app_dashboard" {
     width = 2
 
     sql  = <<-EOQ
-    select
-      name as label,
-      name as value
-    from
-      scalingo_app;
-  EOQ
+      select
+        name as label,
+        name as value
+      from
+        scalingo_app;
+    EOQ
   }
 
   container {
+    card {
+      query = query.scalingo_app_region
+      width = 3
+      icon = "heroicons-outline:building-office"
+
+      args  = {
+        app_name = self.input.app_name.value
+      }
+    }
+
     card {
       query = query.scalingo_app_containers_count
       width = 2
@@ -58,8 +68,8 @@ dashboard "scalingo_app_dashboard" {
     }
 
     table {
-      title = "Activity"
-      query = query.scalingo_app_events
+      title = "Environment"
+      query = query.scalingo_app_environment
       width = 6
 
       args  = {
@@ -76,7 +86,30 @@ dashboard "scalingo_app_dashboard" {
         app_name = self.input.app_name.value
       }
     }
+
+    table {
+      title = "Activity"
+      query = query.scalingo_app_events
+      width = 6
+
+      args  = {
+        app_name = self.input.app_name.value
+      }
+    }
   }
+}
+
+query "scalingo_app_region" {
+  sql = <<-EOQ
+    select
+      region as "Region"
+    from
+      scalingo_app
+    where
+     name = $1;
+  EOQ
+
+  param "app_name" {}
 }
 
 query "scalingo_app_containers" {
@@ -92,7 +125,6 @@ query "scalingo_app_containers" {
      app_name = $1;
   EOQ
 
-
   param "app_name" {}
 }
 
@@ -107,7 +139,6 @@ query "scalingo_app_addons" {
     where
      app_name = $1;
   EOQ
-
 
   param "app_name" {}
 }
@@ -127,7 +158,6 @@ query "scalingo_app_events" {
       20;
   EOQ
 
-
   param "app_name" {}
 }
 
@@ -143,10 +173,21 @@ query "scalingo_app_collaborators" {
       app_name = $1;
   EOQ
 
-
   param "app_name" {}
 }
 
+query "scalingo_app_environment" {
+  sql = <<-EOQ
+    select
+      name
+    from
+      scalingo_environment
+    where
+      app_name = $1;
+  EOQ
+
+  param "app_name" {}
+}
 
 query "scalingo_app_containers_count" {
   sql = <<-EOQ
@@ -157,7 +198,6 @@ query "scalingo_app_containers_count" {
     where
      app_name = $1;
   EOQ
-
 
   param "app_name" {}
 }
@@ -171,7 +211,6 @@ query "scalingo_app_collaborators_count" {
     where
       app_name = $1;
   EOQ
-
 
   param "app_name" {}
 }
