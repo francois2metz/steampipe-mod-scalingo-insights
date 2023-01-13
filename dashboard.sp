@@ -51,13 +51,13 @@ query "scalingo_apps_count" {
 query "scalingo_apps_container" {
   sql = <<-EOQ
     select
-      sum(scalingo_container.amount) as "Containers"
+      sum(scalingo_container_type.amount) as "Containers"
     from
-      scalingo_container
+      scalingo_container_type
     join
       scalingo_app
     on
-      scalingo_container.app_name = scalingo_app.name;
+      scalingo_container_type.app_name = scalingo_app.name;
   EOQ
 }
 
